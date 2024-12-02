@@ -16,6 +16,10 @@ node_modules/
 /target/
 **/*.rs.bk
 
+# Xmake
+.xmake/
+build/
+
 # IDE-specific files
 .vscode/
 .idea/
@@ -26,6 +30,3 @@ node_modules/
 *.swp
 *.swo
 *~
-
-# Personal input files (often provided by Advent of Code)
-**/input.txt
