@@ -49,7 +49,6 @@ auto main() -> int {
 
     auto line_count = std::count(std::istreambuf_iterator<char>(input), {}, '\n');
     input.seekg(0); // Reset stream to the beginning
-    input.clear(); // Clear EOF flag
 
     auto left_list = std::valarray<int>(line_count);
     auto right_list = left_list;
