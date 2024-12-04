@@ -121,8 +121,8 @@ auto main() -> int {
     //     );
     // });
 
-    auto is_safe = [](auto&& range) {
-        auto&& deltas = range | rv::pairwise_transform(std::minus{});
+    auto is_safe = [](auto&& report) {
+        auto&& deltas = report | rv::pairwise_transform(std::minus{});
 
         return deltas
         | rv::transform(is_signed)
