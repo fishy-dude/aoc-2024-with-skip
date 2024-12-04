@@ -40,6 +40,8 @@ namespace my_algo {
 }
 
 auto main() -> int {
+    /// -------------------- Input -------------------- ///
+
     auto input = std::ifstream(R"(input.txt)");
 
     if (not input.is_open()) {
@@ -57,6 +59,8 @@ auto main() -> int {
         input >> left_list[i];
         input >> right_list[i];
     }
+
+    /// -------------------- Task 1 -------------------- ///
 
     my_algo::sort_ranges(std::execution::par_unseq, left_list, right_list);
 
