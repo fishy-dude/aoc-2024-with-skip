@@ -19,8 +19,11 @@ namespace my_algo {
     template <typename T>
     convert_to_fn<T> convert_to{};
 
-    template <auto min, auto max>
-    inline auto clamped = [](auto&& value) { return min <= value and value <= max; };
+    inline auto clamped = [](auto&& min, auto&& max) { 
+        return [&](auto&& value) {
+            return min <= value and value <= max;
+        };
+    };
 
     inline auto always_true = [](auto&&...) { return true; };
 
@@ -81,6 +84,7 @@ namespace my_algo {
     };
 
     inline auto equal_to = [](auto&& value) { return bind_last(std::equal_to{}, value); };
+    inline auto not_equal_to = [](auto&& value) { return std::not_fn(equal_to(value)); };
 
     inline auto pairwise_all = [](auto&& fn) {
         return std::views::pairwise_transform(fn)
@@ -96,6 +100,8 @@ auto main() -> int {
     namespace rg = std::ranges;
     using namespace my_algo;
 
+    /// -------------------- Input -------------------- ///
+
     auto input = std::ifstream(R"(input.txt)");
 
     if (not input.is_open()) {
@@ -108,18 +114,7 @@ auto main() -> int {
     | rv::transform(rv::istream<int>)
     | rg::to<std::vector<report>>();
 
-    // First attempt
-    // auto constrained = reports | std::views::filter([](auto&& report) {
-    //     return std::ranges::all_of(
-    //         report
-    //         | std::views::pairwise_transform(std::compare_three_way{})
-    //         | std::views::pairwise_transform(std::equal_to{}),
-    //         my_algo::equal_to_value<true>
-    //     ) and std::ranges::all_of(
-    //         report | std::views::pairwise_transform(my_algo::difference),
-    //         my_algo::clamped<1, 3>
-    //     );
-    // });
+    /// -------------------- Task 1 -------------------- ///
 
     auto is_safe = [](auto&& report) {
         auto&& deltas = report | rv::pairwise_transform(std::minus{});
@@ -129,26 +124,25 @@ auto main() -> int {
         | pairwise_all(std::equal_to{})
         and deltas
         | rv::transform(absolute)
-        | all_of(clamped<1, 3>);
+        | all_of(clamped(1, 3));
     };
 
-    auto constrained = reports | rv::filter(is_safe);
+    std::println("Task 1: {}", std::ranges::count_if(reports, is_safe));
 
-    std::println("Task 1: {}", length(constrained));
+    /// -------------------- Task 2 -------------------- ///
 
     auto less_constrained = reports | rv::filter([is_safe](auto&& report) {
-        auto levels = convert_to<int>(length(report));
-        
-        return rv::zip_transform([&](auto&& i, auto&& report) {
+        return rv::repeat(report, length(report))
+        | rv::enumerate
+        | rv::transform(destructure([](auto&& i, auto&& report) {
             return report
             | rv::enumerate
-            | rv::filter(destructure(k(std::not_fn(equal_to(i)))))
+            | rv::filter(destructure(k(not_equal_to(i))))
             | rv::values;
-        }, rv::iota(0, levels), rv::repeat(report, levels))
+        }))
         | rv::transform(is_safe)
         | one_of(equal_to(true));
     });
 
     std::println("Task 2: {}", length(less_constrained));
-    
 }
